@@ -1,7 +1,8 @@
 # Energy Visualization Dashboard
 
 - Interactive visualization dashboard of energy data from [Our World in Data](https://github.com/owid/energy-data)
-- Visualizes coal and oil trends on separate pages with pagination
+- Visualizes coal and oil trends using line graphs, heatmaps, scatter plots, and bar graphs
+- Allows users to navigate pages using button selectors
 - [App URL](https://rubinghimire.github.io/energy-visualization-dashboard)
 
 # Tech Stack
