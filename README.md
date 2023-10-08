@@ -1,12 +1,12 @@
 # World Energy Dashboard
 
 - Interactive visualization dashboard of energy data from [Our World in Data](https://github.com/owid/energy-data)
-- Current version visualizes coal consumption trends by continents
+- Visualizes coal and oil trends on separate pages with pagination
 - [App URL](https://rubinghimire.github.io/energy-visualization-dashboard)
 
 # Tech Stack
 
-- Python, pandas, NumPy, Panel
+- Python, pandas, NumPy, Panel, hvPlot, Holoviews
 
 # Installation
 
@@ -19,11 +19,11 @@
     `panel serve energy_dashboard.ipynb`
   - Access the dashboard via
     `localhost:5006/energy_dashboard`
-- HTML (alternative): access the dashboard by running the html file in a server environment
+- HTML (no installation required): access the dashboard by running the html file in a server environment
 
 # Credits
 
-- [Thu Vu](https://www.conscientiousgeek.com/) for being my guide
+- [Thu Vu](https://www.conscientiousgeek.com/) for sharing the base code
 
 # License
 

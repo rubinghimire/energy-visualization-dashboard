@@ -15,7 +15,7 @@ async function startApplication() {
   self.pyodide.globals.set("sendPatch", sendPatch);
   console.log("Loaded!");
   await self.pyodide.loadPackage("micropip");
-  const env_spec = ['https://cdn.holoviz.org/panel/1.2.3/dist/wheels/bokeh-3.2.2-py3-none-any.whl', 'https://cdn.holoviz.org/panel/1.2.3/dist/wheels/panel-1.2.3-py3-none-any.whl', 'pyodide-http==0.2.1', 'hvplot', 'numpy', 'pandas']
+  const env_spec = ['https://cdn.holoviz.org/panel/1.2.3/dist/wheels/bokeh-3.2.2-py3-none-any.whl', 'https://cdn.holoviz.org/panel/1.2.3/dist/wheels/panel-1.2.3-py3-none-any.whl', 'pyodide-http==0.2.1', 'holoviews', 'hvplot', 'numpy', 'pandas']
   for (const pkg of env_spec) {
     let pkg_name;
     if (pkg.endsWith('.whl')) {
@@ -56,12 +56,14 @@ init_doc()
 import pandas as pd
 import numpy as np
 import panel as pn
+from panel.template import FastListTemplate
 pn.extension('tabulator')
-
+pn.extension(sizing_mode='stretch_width')
 import hvplot.pandas
+import holoviews as hv
 
 
-# In[2]:
+# In[20]:
 
 
 # Cache data to improve performance
@@ -75,44 +77,27 @@ else:
 # In[ ]:
 
 
-# Explore the dataframe
-df
-
-
-# In[ ]:
-
-
 df.columns
 
 
-# In[ ]:
-
-
-df[df['country'] == 'Asia']
-
-
-# In[6]:
+# In[22]:
 
 
 coal_columns = [col for col in df.columns if col.startswith('coal')]
-
-
-# In[ ]:
-
-
 coal_columns
 
 
 # ### (0) Data preprocessing
 
-# In[8]:
+# In[23]:
 
 
 # Fill NAs with 0s
 df = df.fillna(0)
+df['gdp_per_capita'] = np.where(df['population']!=0, df['gdp']/df['population'],0)
 
 
-# In[9]:
+# In[24]:
 
 
 # Make DF pipeline interactive
@@ -121,7 +106,7 @@ idf = df.interactive()
 
 # ### (1) Coal consumption over time by continent
 
-# In[10]:
+# In[25]:
 
 
 # Define panel widgets
@@ -129,7 +114,7 @@ year_slider = pn.widgets.IntSlider(name='Year slider', start=1960, end=2022, ste
 year_slider
 
 
-# In[11]:
+# In[26]:
 
 
 # Radio buttons for coal measures
@@ -140,7 +125,7 @@ yaxis_coal = pn.widgets.RadioButtonGroup(
 )
 
 
-# In[12]:
+# In[27]:
 
 
 # Connect data pipeline with widgets
@@ -152,7 +137,7 @@ coal_pipeline = (
         (idf.year >= year_slider) &  # Filter rows for year <= year_slider
         (idf.country.isin(continents))
     ]
-    .groupby(['country', 'year'])[yaxis_coal].mean() # Average of yaxis_coal for each country over time (year)
+    .groupby(['country', 'year','coal_production'])[yaxis_coal].mean() # Average of yaxis_coal for each country over time (year)
     .to_frame() # Convert result to df
     .reset_index()
     .sort_values(by='year')
@@ -160,32 +145,31 @@ coal_pipeline = (
 )
 
 
-# In[13]:
+# In[28]:
 
 
 coal_pipeline.tail(10)
 
 
-# In[ ]:
+# In[29]:
 
 
 # Plot the data
 coal_plot = coal_pipeline.hvplot(x = 'year', by='country', y=yaxis_coal, line_width=2, title="Coal Consumption by Continent")
-coal_plot
 
 
-# ### (2) Table - Coal consumption over time by continent
+# ### (2) Heatmap - Coal production over time
 
-# In[15]:
-
-
-coal_table = coal_pipeline.pipe(pn.widgets.Tabulator, pagination='remote', page_size = 10, sizing_mode='stretch_width')
-coal_table
+# In[30]:
 
 
-# ### (3) Coal vs GDP scatterplot
+# coal_table = coal_pipeline.pipe(pn.widgets.Tabulator, pagination='remote', page_size = 10, sizing_mode='stretch_width')
+coal_heatmap = coal_pipeline.hvplot.heatmap(x='year', y='country', C='coal_production', cmap='Set3', title='Coal Production by Continent')
 
-# In[16]:
+
+# ### (3) Coal vs GDP Scatterplot
+
+# In[31]:
 
 
 # Create a subset of idf based on specified conditions
@@ -194,7 +178,7 @@ coal_gdp_pipeline = (
         (idf.year == year_slider) & 
         (~ (idf.country.isin(continents)))
     ]
-    .groupby(['country', 'year', 'coal_cons_per_capita'])['coal_consumption'].mean() # Average of coal_consumption for each country over time (year)
+    .groupby(['country', 'year', 'gdp_per_capita'])['coal_consumption'].mean() # Average of coal_consumption for each country over time (year)
     .to_frame() # Convert result to df
     .reset_index()
     .sort_values(by='year')
@@ -202,7 +186,7 @@ coal_gdp_pipeline = (
 )
 
 
-# In[17]:
+# In[32]:
 
 
 coal_gdp_pipeline
@@ -211,19 +195,19 @@ coal_gdp_pipeline
 # In[ ]:
 
 
-coal_gdp_scatterplot = coal_gdp_pipeline.hvplot(x='coal_cons_per_capita', y='coal_consumption', by='country', size=80, kind="scatter", alpha=0.7, legend=False, height=500, width=500)
+coal_gdp_scatterplot = coal_gdp_pipeline.hvplot(x='gdp_per_capita', y='coal_consumption', by='country', size=80, kind="scatter", alpha=0.7, legend=False, height=500, width=500, title='Coal Consumption vs GDP Per Capita by Country')
 coal_gdp_scatterplot
 
 
 # ### (4) Bar chart with coal facts by continent
 
-# In[30]:
+# In[34]:
 
 
 # Create a separate widget for the chart
 yaxis_coal_facts = pn.widgets.RadioButtonGroup(
     name='Y axis',
-    options=['coal_cons_change_pct', 'coal_production', 'coal_share_energy'],
+    options=['coal_cons_change_pct', 'energy_cons_change_pct', 'coal_share_energy'],
     button_type='success'
 )
 
@@ -248,32 +232,147 @@ coal_facts_bar_plot = coal_facts_bar_pipeline.hvplot(kind='bar', x='country', y=
 coal_facts_bar_plot
 
 
-# ### (5) Build the dashboard
+# ### (5) Repeat the steps above for oil
 
 # In[36]:
 
 
-#Layout using Template
-template = pn.template.FastListTemplate(
-    title='World Energy Dashboard',
-    # Elements/design for sidebar 
-    sidebar=[pn.pane.Markdown("# Coal Consumption"), 
-             pn.pane.Markdown("#### This interactive panel provides insights into the global coal consumption trends and patterns over time."),
-             pn.pane.JPG('globe_bulb.jpg', sizing_mode='stretch_both'),
+# Radio buttons for gas measures
+df['oil_cons_per_capita'] = df['oil_consumption'] / df['population']
+yaxis_oil = pn.widgets.RadioButtonGroup(
+    name = 'Y axis',
+    options = ['oil_consumption', 'oil_cons_per_capita'],
+    button_type = 'success'
+)
+
+# Create a subset of idf based on specified conditions
+oil_pipeline = (
+    idf[
+        (idf.year >= year_slider) &  # Filter rows for year >= year_slider
+        (idf.country.isin(continents))
+    ]
+    .groupby(['country', 'year','oil_production'])[yaxis_oil].mean() # Average of yaxis_oil for each country over time (year)
+    .to_frame() # Convert result to df
+    .reset_index()
+    .sort_values(by='year')
+    .reset_index(drop=True) # Discard old index and assign default integer index
+)
+
+oil_plot = oil_pipeline.hvplot(x = 'year', by='country', y=yaxis_oil, line_width=2, title="Oil Consumption by Continent")
+# oil_table = oil_pipeline.pipe(pn.widgets.Tabulator, pagination='remote', page_size = 10, sizing_mode='stretch_width')
+oil_heatmap = oil_pipeline.hvplot.heatmap(x='year', y='country', C='oil_production', cmap='Set3', title='Oil Production by Continent')
+
+# Create a subset of idf based on specified conditions
+oil_gdp_pipeline = (
+    idf[
+        (idf.year == year_slider) & 
+        (~ (idf.country.isin(continents)))
+    ]
+    .groupby(['country', 'year', 'gdp_per_capita', 'oil_cons_per_capita'])['oil_consumption'].mean() # Average of coal_consumption for each country over time (year)
+    .to_frame() # Convert result to df
+    .reset_index()
+    .sort_values(by='year')
+    .reset_index(drop=True) # Discard old index and assign default integer index
+)
+
+oil_gdp_scatterplot = oil_gdp_pipeline.hvplot(x='gdp_per_capita', y='oil_consumption', by='country', size=80, kind="scatter", alpha=0.7, legend=False, height=500, width=500,title='Oil Consumption vs GDP Per Capita by Country')
+# Create a separate widget for the chart
+yaxis_oil_facts = pn.widgets.RadioButtonGroup(
+    name='Y axis',
+    options=['oil_cons_change_pct', 'energy_cons_change_pct', 'oil_share_energy'],
+    button_type='success'
+)
+oil_facts_bar_pipeline =  (
+    idf[
+        (idf.year == year_slider) & 
+        (idf.country.isin(continents_excl))
+    ]
+    .groupby(['year', 'country'])[yaxis_oil_facts].sum()
+    .to_frame() # Convert result to df
+    .reset_index()
+    .sort_values(by='year')
+    .reset_index(drop=True) # Discard old index and assign default integer index
+)
+oil_facts_bar_plot = oil_facts_bar_pipeline.hvplot(kind='bar', x='country', y=yaxis_oil_facts, title='Oil Facts by Continent')
+
+
+# ### (5) Build the dashboard
+
+# In[ ]:
+
+
+# Define your data and widgets here
+class PageCoal:
+    def __init__(self):
+        self.content = pn.Column(
+            "# Coal",
+            pn.Row(
+                pn.Column(yaxis_coal, coal_plot.panel(width=600), margin=(0, 25)),
+                pn.Column(coal_heatmap.panel(width=700))
+            ),
+            pn.Row(
+                pn.Column(coal_gdp_scatterplot.panel(width=600), margin=(0, 25)),
+                pn.Column(yaxis_coal_facts, coal_facts_bar_plot.panel(width=700))
+            )
+        )
+
+    def view(self):
+        return self.content
+
+class PageOil:
+    def __init__(self):
+        self.content = pn.Column(
+            "# Oil",
+            pn.Row(
+                pn.Column(yaxis_oil, oil_plot.panel(width=600), margin=(0, 25)),
+                pn.Column(oil_heatmap.panel(width=700))
+            ),
+            pn.Row(
+                pn.Column(oil_gdp_scatterplot.panel(width=600), margin=(0, 25)),
+                pn.Column(yaxis_oil_facts, oil_facts_bar_plot.panel(width=700))
+            )
+        )
+
+    def view(self):
+        return self.content
+
+pages = {
+    "Coal": PageCoal(),
+    "Oil": PageOil(),
+}
+
+# Function to show the selected page
+def show_page(page_instance):
+    main_area.clear()
+    main_area.append(page_instance.view())
+
+# Define buttons to navigate between pages
+page_coal_button = pn.widgets.Button(name="Coal", button_type="primary", width=250)
+page_oil_button = pn.widgets.Button(name="Oil", button_type="primary", width=250)
+
+# Set up button click callbacks
+page_coal_button.on_click(lambda event: show_page(pages["Coal"]))
+page_oil_button.on_click(lambda event: show_page(pages["Oil"]))
+
+# Create the main area and display the first page
+main_area = pn.Column(pages["Coal"].view())
+
+# Create the Material Template and set the sidebar and main area
+template = FastListTemplate(
+    title="World Energy Dashboard",
+    sidebar=[pn.pane.Markdown("#### This interactive panel provides insights into global energy trends and patterns over time. Select from the options below."),
+             page_coal_button, 
+             page_oil_button, 
              pn.pane.Markdown("## Settings"),
              year_slider],
-    # Elements/design for main section
-    main=[pn.Row(pn.Column(yaxis_coal, 
-                           coal_plot.panel(width=600), margin=(0,25)), 
-                 coal_table.panel(width=300)), 
-          pn.Row(pn.Column(coal_gdp_scatterplot.panel(width=550), margin=(0,25)), 
-                 pn.Column(yaxis_coal_facts, coal_facts_bar_plot.panel(width=600)))],
+    main=[main_area],
     accent_base_color="#d88888",
     header_background="#d8b088",
     sidebar_width=320
 )
-# template.show()
-template.servable();
+
+# Serve the Panel app
+template.servable()
 
 
 
