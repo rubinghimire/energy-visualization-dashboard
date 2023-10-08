@@ -1,4 +1,4 @@
-# World Energy Dashboard
+# Energy Visualization Dashboard
 
 - Interactive visualization dashboard of energy data from [Our World in Data](https://github.com/owid/energy-data)
 - Current version visualizes coal consumption trends by continents
