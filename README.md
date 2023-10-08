@@ -18,7 +18,7 @@
   - Install dependencies `pip install -r requirements.txt`
   - Run the application `panel serve energy_dashboard.ipynb`
   - Access the dashboard from the browser `localhost:5006/energy_dashboard`
-- HTML (no installation required): access the dashboard by running the html file in a server environment
+- HTML (no installation required): access the dashboard by running the `index.html` file in a server environment
 
 # Credits
 
