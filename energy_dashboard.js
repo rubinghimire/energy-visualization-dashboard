@@ -66,13 +66,9 @@ import hvplot.pandas
 
 # Cache data to improve performance
 if 'data' not in pn.state.cache.keys():
-
-    df = pd.read_csv("https://nyc3.digitaloceanspaces.com/owid-public/data/energy/owid-energy-data.csv")
-
+    df = pd.read_csv('https://nyc3.digitaloceanspaces.com/owid-public/data/energy/owid-energy-data.csv')
     pn.state.cache['data'] = df.copy()
-
 else: 
-
     df = pn.state.cache['data']
 
 
@@ -224,6 +220,7 @@ coal_gdp_scatterplot
 # In[30]:
 
 
+# Create a separate widget for the chart
 yaxis_coal_facts = pn.widgets.RadioButtonGroup(
     name='Y axis',
     options=['coal_cons_change_pct', 'coal_production', 'coal_share_energy'],
@@ -258,19 +255,21 @@ coal_facts_bar_plot
 
 #Layout using Template
 template = pn.template.FastListTemplate(
-    title='World Energy Dashboard', 
+    title='World Energy Dashboard',
+    # Elements/design for sidebar 
     sidebar=[pn.pane.Markdown("# Coal Consumption"), 
              pn.pane.Markdown("#### This interactive panel provides insights into the global coal consumption trends and patterns over time."),
              pn.pane.JPG('globe_bulb.jpg', sizing_mode='scale_both'),
              pn.pane.Markdown("## Settings"),   
              year_slider],
-     main=[pn.Row(pn.Column(yaxis_coal, 
+    # Elements/design for main section
+    main=[pn.Row(pn.Column(yaxis_coal, 
                            coal_plot.panel(width=600), margin=(0,25)), 
                  coal_table.panel(width=300)), 
-          pn.Row(pn.Column(coal_gdp_scatterplot.panel(width=450), margin=(0,25)), 
-                 pn.Column(yaxis_coal_facts, coal_facts_bar_plot.panel(width=450)))],
+          pn.Row(pn.Column(coal_gdp_scatterplot.panel(width=550), margin=(0,25)), 
+                 pn.Column(yaxis_coal_facts, coal_facts_bar_plot.panel(width=630)))],
     accent_base_color="#d88888",
-    header_background="#88d8b0",
+    header_background="#d8b088",
     sidebar_width=250
 )
 # template.show()
