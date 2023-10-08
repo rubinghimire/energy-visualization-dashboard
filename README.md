@@ -24,7 +24,10 @@
 # Credits
 
 - [Thu Vu](https://github.com/thu-vu92) for providing the base code
-- I've modified her code for different data set and added pagination feature
+- My modifications:
+    - Code changes for a different data set
+    - Added pagination feature, heatmap and tweaked design
+    - Included comments in the notebook for better readability
 
 
 - # License
