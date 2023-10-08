@@ -14,7 +14,7 @@
 - Go inside the project directory
 - Python:
   - Create a virtual environment and enter
-  - Install dependencies from requirements.txt
+  - Install dependencies using `pip install -r requirements.txt`
   - Enter this command:
     `panel serve energy_dashboard.ipynb`
   - Access the dashboard via
