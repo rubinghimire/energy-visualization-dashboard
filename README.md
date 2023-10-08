@@ -13,7 +13,7 @@
 - Download zip and extract files
 - Go inside the project directory
 - Python:
-  - Create a virtual environment
+  - Create a virtual environment and enter
   - Install dependencies from requirements.txt
   - Enter this command:
     `panel serve energy_dashboard.ipynb`
