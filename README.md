@@ -1,29 +1,34 @@
 # Energy Visualization Dashboard
 
 - Interactive visualization dashboard of energy data from [Our World in Data](https://github.com/owid/energy-data)
-- Visualizes coal and oil trends on separate pages with pagination
+- Visualizes coal and oil trends using line graphs, heatmaps, scatter plots, and bar graphs
+- Allows users to navigate pages using button selectors
 - [App URL](https://rubinghimire.github.io/energy-visualization-dashboard)
 
 # Tech Stack
 
-- Python, pandas, NumPy, Panel, hvPlot, Holoviews
+- Python, pandas, NumPy, Panel, hvPlot, HoloViews
 
 # Installation
 
 - Download zip and extract files
 - Go inside the project directory
 - Python:
-  - Create a virtual environment
-  - Install dependencies from requirements.txt
-  - Enter this command:
-    `panel serve energy_dashboard.ipynb`
-  - Access the dashboard via
-    `localhost:5006/energy_dashboard`
-- HTML (no installation required): access the dashboard by running the html file in a server environment
+  - Create a virtual environment (venv) `python -m venv /path/to/directory`
+  - Activate the venv `path\to\venv\Scripts\activate.bat`
+  - Install dependencies `pip install -r requirements.txt`
+  - Run the application `panel serve energy_dashboard.ipynb`
+  - Access the dashboard from the browser `localhost:5006/energy_dashboard`
+- HTML (no installation required): access the dashboard by running the `index.html` file in a server environment
 
 # Credits
 
-- [Thu Vu](https://www.conscientiousgeek.com/) for sharing the base code
+- [Thu Vu](https://github.com/thu-vu92) for providing the base code
+- My modifications:
+    - Code changes for a different data set
+    - Added pagination feature, heatmap and tweaked design
+    - Included comments in the notebook for better readability
+
 
 # License
 
