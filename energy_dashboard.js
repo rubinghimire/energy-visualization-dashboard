@@ -259,18 +259,18 @@ template = pn.template.FastListTemplate(
     # Elements/design for sidebar 
     sidebar=[pn.pane.Markdown("# Coal Consumption"), 
              pn.pane.Markdown("#### This interactive panel provides insights into the global coal consumption trends and patterns over time."),
-             pn.pane.JPG('globe_bulb.jpg', sizing_mode='scale_both'),
-             pn.pane.Markdown("## Settings"),   
+             pn.pane.JPG('globe_bulb.jpg', sizing_mode='stretch_both'),
+             pn.pane.Markdown("## Settings"),
              year_slider],
     # Elements/design for main section
     main=[pn.Row(pn.Column(yaxis_coal, 
                            coal_plot.panel(width=600), margin=(0,25)), 
                  coal_table.panel(width=300)), 
           pn.Row(pn.Column(coal_gdp_scatterplot.panel(width=550), margin=(0,25)), 
-                 pn.Column(yaxis_coal_facts, coal_facts_bar_plot.panel(width=630)))],
+                 pn.Column(yaxis_coal_facts, coal_facts_bar_plot.panel(width=600)))],
     accent_base_color="#d88888",
     header_background="#d8b088",
-    sidebar_width=250
+    sidebar_width=320
 )
 # template.show()
 template.servable();

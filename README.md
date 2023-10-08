@@ -2,6 +2,7 @@
 
 - Interactive visualization dashboard of energy data from [Our World in Data](https://github.com/owid/energy-data)
 - Current version visualizes coal consumption trends by continents
+- [App URL](https://rubinghimire.github.io/energy-visualization-dashboard)
 
 # Tech Stack
 
