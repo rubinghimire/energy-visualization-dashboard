@@ -6,7 +6,7 @@
 
 # Tech Stack
 
-- Python, pandas, NumPy, Panel, hvPlot, Holoviews
+- Python, pandas, NumPy, Panel, hvPlot, HoloViews
 
 # Installation
 
