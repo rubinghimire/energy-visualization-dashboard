@@ -23,8 +23,9 @@
 
 # Credits
 
-- [Thu Vu](https://www.conscientiousgeek.com/) for sharing the base code
+- [Thu Vu](https://github.com/thu-vu92) for providing the base code
 
-# License
+
+- # License
 
 [![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](http://unlicense.org)
