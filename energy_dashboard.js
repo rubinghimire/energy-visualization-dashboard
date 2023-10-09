@@ -66,15 +66,16 @@ import holoviews as hv
 # In[29]:
 
 
+# Enable throttling for sliders to improve performance
+pn.config.throttled = True
+
 # Cache data to improve performance
 if 'data' not in pn.state.cache.keys():
     df = pd.read_csv('./data/owid-energy-data.csv')
+    df = df[df['year'] >= 1960]
     pn.state.cache['data'] = df.copy()
 else: 
     df = pn.state.cache['data']
-
-# Enable throttling for sliders to improve performance
-pn.config.throttled = True
 
 
 # In[ ]:
