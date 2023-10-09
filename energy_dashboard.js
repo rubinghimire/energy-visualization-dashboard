@@ -63,24 +63,21 @@ import hvplot.pandas
 import holoviews as hv
 
 
-# In[20]:
+# In[29]:
 
 
 # Cache data to improve performance
 if 'data' not in pn.state.cache.keys():
-    df = pd.read_csv('https://nyc3.digitaloceanspaces.com/owid-public/data/energy/owid-energy-data.csv')
+    df = pd.read_csv('./data/owid-energy-data.csv')
     pn.state.cache['data'] = df.copy()
 else: 
     df = pn.state.cache['data']
 
+# Enable throttling for sliders to improve performance
+pn.config.throttled = True
+
 
 # In[ ]:
-
-
-df.columns
-
-
-# In[22]:
 
 
 coal_columns = [col for col in df.columns if col.startswith('coal')]
@@ -89,15 +86,15 @@ coal_columns
 
 # ### (0) Data preprocessing
 
-# In[23]:
+# In[32]:
 
 
-# Fill NAs with 0s
+# Fill NAs with 0s and calculate gdp per capita for later use
 df = df.fillna(0)
 df['gdp_per_capita'] = np.where(df['population']!=0, df['gdp']/df['population'],0)
 
 
-# In[24]:
+# In[33]:
 
 
 # Make DF pipeline interactive
@@ -106,7 +103,7 @@ idf = df.interactive()
 
 # ### (1) Coal consumption over time by continent
 
-# In[25]:
+# In[34]:
 
 
 # Define panel widgets
@@ -114,7 +111,7 @@ year_slider = pn.widgets.IntSlider(name='Year slider', start=1960, end=2022, ste
 year_slider
 
 
-# In[26]:
+# In[35]:
 
 
 # Radio buttons for coal measures
@@ -125,42 +122,42 @@ yaxis_coal = pn.widgets.RadioButtonGroup(
 )
 
 
-# In[27]:
+# In[36]:
 
 
-# Connect data pipeline with widgets
+# Connect data pipeline with widgets here
 continents = ['World', 'Asia', 'Oceania', 'Europe', 'Africa', 'North America', 'South America', 'Antarctica']
 
 # Create a subset of idf based on specified conditions
 coal_pipeline = (
     idf[
-        (idf.year >= year_slider) &  # Filter rows for year <= year_slider
+        (idf.year >= year_slider) &  # Filter rows for year >= year_slider
         (idf.country.isin(continents))
     ]
     .groupby(['country', 'year','coal_production'])[yaxis_coal].mean() # Average of yaxis_coal for each country over time (year)
-    .to_frame() # Convert result to df
+    .to_frame() # Convert result to dataframe
     .reset_index()
     .sort_values(by='year')
     .reset_index(drop=True) # Discard old index and assign default integer index
 )
 
 
-# In[28]:
-
-
-coal_pipeline.tail(10)
-
-
-# In[29]:
+# In[38]:
 
 
 # Plot the data
 coal_plot = coal_pipeline.hvplot(x = 'year', by='country', y=yaxis_coal, line_width=2, title="Coal Consumption by Continent")
 
 
+# In[37]:
+
+
+coal_pipeline.tail(10)
+
+
 # ### (2) Heatmap - Coal production over time
 
-# In[30]:
+# In[39]:
 
 
 # coal_table = coal_pipeline.pipe(pn.widgets.Tabulator, pagination='remote', page_size = 10, sizing_mode='stretch_width')
@@ -169,7 +166,7 @@ coal_heatmap = coal_pipeline.hvplot.heatmap(x='year', y='country', C='coal_produ
 
 # ### (3) Coal vs GDP Scatterplot
 
-# In[31]:
+# In[40]:
 
 
 # Create a subset of idf based on specified conditions
@@ -186,7 +183,7 @@ coal_gdp_pipeline = (
 )
 
 
-# In[32]:
+# In[41]:
 
 
 coal_gdp_pipeline
@@ -201,7 +198,7 @@ coal_gdp_scatterplot
 
 # ### (4) Bar chart with coal facts by continent
 
-# In[34]:
+# In[43]:
 
 
 # Create a separate widget for the chart
@@ -218,7 +215,7 @@ coal_facts_bar_pipeline =  (
         (idf.country.isin(continents_excl))
     ]
     .groupby(['year', 'country'])[yaxis_coal_facts].sum()
-    .to_frame() # Convert result to df
+    .to_frame() # Convert result to dataframe
     .reset_index()
     .sort_values(by='year')
     .reset_index(drop=True) # Discard old index and assign default integer index
@@ -234,10 +231,10 @@ coal_facts_bar_plot
 
 # ### (5) Repeat the steps above for oil
 
-# In[36]:
+# In[45]:
 
 
-# Radio buttons for gas measures
+# Radio buttons for oil measures
 df['oil_cons_per_capita'] = df['oil_consumption'] / df['population']
 yaxis_oil = pn.widgets.RadioButtonGroup(
     name = 'Y axis',
@@ -252,12 +249,12 @@ oil_pipeline = (
         (idf.country.isin(continents))
     ]
     .groupby(['country', 'year','oil_production'])[yaxis_oil].mean() # Average of yaxis_oil for each country over time (year)
-    .to_frame() # Convert result to df
+    .to_frame() # Convert result to dataframe
     .reset_index()
     .sort_values(by='year')
     .reset_index(drop=True) # Discard old index and assign default integer index
 )
-
+# Create plot, (table), and heatmap
 oil_plot = oil_pipeline.hvplot(x = 'year', by='country', y=yaxis_oil, line_width=2, title="Oil Consumption by Continent")
 # oil_table = oil_pipeline.pipe(pn.widgets.Tabulator, pagination='remote', page_size = 10, sizing_mode='stretch_width')
 oil_heatmap = oil_pipeline.hvplot.heatmap(x='year', y='country', C='oil_production', cmap='Set3', title='Oil Production by Continent')
@@ -269,14 +266,14 @@ oil_gdp_pipeline = (
         (~ (idf.country.isin(continents)))
     ]
     .groupby(['country', 'year', 'gdp_per_capita', 'oil_cons_per_capita'])['oil_consumption'].mean() # Average of coal_consumption for each country over time (year)
-    .to_frame() # Convert result to df
+    .to_frame() # Convert result to dataframe
     .reset_index()
     .sort_values(by='year')
     .reset_index(drop=True) # Discard old index and assign default integer index
 )
-
+# Create a scatterplot
 oil_gdp_scatterplot = oil_gdp_pipeline.hvplot(x='gdp_per_capita', y='oil_consumption', by='country', size=80, kind="scatter", alpha=0.7, legend=False, height=500, width=500,title='Oil Consumption vs GDP Per Capita by Country')
-# Create a separate widget for the chart
+# Create a separate widget for the bar graph
 yaxis_oil_facts = pn.widgets.RadioButtonGroup(
     name='Y axis',
     options=['oil_cons_change_pct', 'energy_cons_change_pct', 'oil_share_energy'],
@@ -287,8 +284,8 @@ oil_facts_bar_pipeline =  (
         (idf.year == year_slider) & 
         (idf.country.isin(continents_excl))
     ]
-    .groupby(['year', 'country'])[yaxis_oil_facts].sum()
-    .to_frame() # Convert result to df
+    .groupby(['year', 'country'])[yaxis_oil_facts].sum() # Bar graphs use sum to aggregate data
+    .to_frame() # Convert result to dataframe
     .reset_index()
     .sort_values(by='year')
     .reset_index(drop=True) # Discard old index and assign default integer index
@@ -296,12 +293,12 @@ oil_facts_bar_pipeline =  (
 oil_facts_bar_plot = oil_facts_bar_pipeline.hvplot(kind='bar', x='country', y=yaxis_oil_facts, title='Oil Facts by Continent')
 
 
-# ### (5) Build the dashboard
+# ### (6) Build the dashboard
 
 # In[ ]:
 
 
-# Define your data and widgets here
+# Define your page classes with their content structure
 class PageCoal:
     def __init__(self):
         self.content = pn.Column(
@@ -346,18 +343,18 @@ def show_page(page_instance):
     main_area.clear()
     main_area.append(page_instance.view())
 
-# Define buttons to navigate between pages
+# Button definitions to navigate between pages
 page_coal_button = pn.widgets.Button(name="Coal", button_type="primary", width=250)
 page_oil_button = pn.widgets.Button(name="Oil", button_type="primary", width=250)
 
-# Set up button click callbacks
+# Button click callbacks
 page_coal_button.on_click(lambda event: show_page(pages["Coal"]))
 page_oil_button.on_click(lambda event: show_page(pages["Oil"]))
 
 # Create the main area and display the first page
 main_area = pn.Column(pages["Coal"].view())
 
-# Create the Material Template and set the sidebar and main area
+# Create the Fast List Template and set the sidebar, main area, and styles
 template = FastListTemplate(
     title="World Energy Dashboard",
     sidebar=[pn.pane.Markdown("#### This interactive panel provides insights into global energy trends and patterns over time. Select from the options below."),

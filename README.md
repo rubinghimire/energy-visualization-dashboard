@@ -25,10 +25,10 @@
 
 - [Thu Vu](https://github.com/thu-vu92) for providing the base code
 - My modifications:
-    - Code changes for a different data set
-    - Added pagination feature, heatmap and tweaked design
-    - Included comments in the notebook for better readability
-
+  - Adapted code for a different data set
+  - Added pagination feature, heatmap and tweaked style
+  - Improved performance by 30%
+  - Included comments in the notebook for better readability
 
 # License
 
